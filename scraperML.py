@@ -1,3 +1,12 @@
+"""
+    Script de scraping de Mercado Libre
+
+    Autor: MarcosCardozo
+    Fecha de creación: 30/5/2023
+
+    Este script realiza web scraping de productos en Mercado Libre.
+"""
+
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
@@ -47,7 +56,7 @@ try:
 
         productos = soup.find_all('div', attrs={'class':'ui-search-result__content-wrapper shops__result-content-wrapper'})
         df_productos =  pd.concat([df_productos, extraerProductos(productos)], axis=0)
-        
+
         url = soup.find('a', class_='andes-pagination__link shops__pagination-link ui-search-link').get('href')
 
     df_productos.to_csv(PRODUCTO+'.csv', index=False)
