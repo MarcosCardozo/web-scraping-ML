@@ -9,19 +9,19 @@ def extraerProductos(p_productos):
 
     for producto in productos:
         nombre_producto = producto.find('h2', class_='ui-search-item__title shops__item-title').get_text()
-        precio = float(producto.find('span', class_='price-tag-fraction').get_text())
+        precio = producto.find('span', class_='price-tag-fraction').get_text()
 
         # Uso try-except porque algunos productos no tienen calificacion ni descuento
         try: 
             calificacion_elem = producto.find('span', class_='andes-visually-hidden').get_text()
-            calificacion = float(calificacion_elem.split(' ')[1])
-            n_opiniones = int(calificacion_elem.split(' ')[4])
+            calificacion = calificacion_elem.split(' ')[1]
+            n_opiniones = calificacion_elem.split(' ')[4]
         except:
             calificacion = None
             n_opiniones = None
         
         try:
-            porcentaje_descuento = float(producto.find('span', attrs={'class':'ui-search-price__discount shops__price-discount'}).get_text().replace('% OFF', ''))
+            porcentaje_descuento = producto.find('span', attrs={'class':'ui-search-price__discount shops__price-discount'}).get_text().replace('% OFF', '')
         except:
             porcentaje_descuento = None
 
@@ -29,20 +29,29 @@ def extraerProductos(p_productos):
     
     return pd.DataFrame(l_productos, columns=['nombre_producto', 'calificacion(0-5)', 'n_opiniones', 'precio_original', 'porcentaje_descuento', 'fecha_scrp'])
 
+PRODUCTO = input("Que Producto le gustaria extraer de ML? ")
+url = input("Pegue la URL de la pagina de mercado libre del producto de interes: ")
+#url = "https://listado.mercadolibre.com.ar/celulares-telefonos/celulares-smartphones/celulares_NoIndex_True#D[A:celulares,on]"
 
-url = "https://listado.mercadolibre.com.ar/celulares-telefonos/celulares-smartphones/celulares_NoIndex_True#D[A:celulares,on]"
+PAGINAS = int(input("\nAhora ingrese el número de paginas que desea scrapear: "))
+
 df_productos=pd.DataFrame()
 
-for i in range(3):
 
-    res = requests.get(url)
+try: 
+    for i in range(PAGINAS):
 
-    soup = BeautifulSoup(res.content, 'html.parser')
+        res = requests.get(url)
 
-    productos = soup.find_all('div', attrs={'class':'ui-search-result__content-wrapper shops__result-content-wrapper'})
-    df_productos =  pd.concat([df_productos, extraerProductos(productos)], axis=0)
-    df_productos.tail()
-    url = soup.find('a', class_='andes-pagination__link shops__pagination-link ui-search-link').get('href')
+        soup = BeautifulSoup(res.content, 'html.parser')
 
-    
-df_productos.to_csv('productos.csv', index=False)
+        productos = soup.find_all('div', attrs={'class':'ui-search-result__content-wrapper shops__result-content-wrapper'})
+        df_productos =  pd.concat([df_productos, extraerProductos(productos)], axis=0)
+        df_productos.tail()
+        url = soup.find('a', class_='andes-pagination__link shops__pagination-link ui-search-link').get('href')
+
+    df_productos.to_csv(PRODUCTO+'.csv', index=False)
+
+    print("Se han cargado todos los productos correctamente...")
+except:
+    print("No se pudieron cargar los productos...")
