@@ -47,7 +47,7 @@ try:
 
         productos = soup.find_all('div', attrs={'class':'ui-search-result__content-wrapper shops__result-content-wrapper'})
         df_productos =  pd.concat([df_productos, extraerProductos(productos)], axis=0)
-        df_productos.tail()
+        
         url = soup.find('a', class_='andes-pagination__link shops__pagination-link ui-search-link').get('href')
 
     df_productos.to_csv(PRODUCTO+'.csv', index=False)
